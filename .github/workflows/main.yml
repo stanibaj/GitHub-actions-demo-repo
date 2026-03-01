@@ -1,0 +1,24 @@
+name: Test Custom Local Tool
+
+on: 
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+
+jobs:
+  run-local-binary:
+    # Ensure this matches the label of your self-hosted runner
+    runs-on: self-hosted 
+
+    steps:
+      - name: Check if tool exists
+        run: ls -l /opt/actions-runner-test/hello-tool.sh
+
+      - name: Execute via Absolute Path
+        run: /opt/actions-runner-test/hello-tool.sh
+
+      - name: Execute by adding to PATH
+        run: |
+          # Add the custom directory to the GITHUB_PATH environment file
+          echo "/opt/actions-runner-test" >> $GITHUB_PATH
+          
+          # Now you can call the script name directly in the next step
+          hello-tool.sh
