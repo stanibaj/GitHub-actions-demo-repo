@@ -14,11 +14,11 @@ jobs:
 
       - name: Execute via Absolute Path
         run: /opt/actions-runner-test/hello-tool.sh
-
-      - name: Execute by adding to PATH
+      - name: export path
         run: |
           # Add the custom directory to the GITHUB_PATH environment file
           echo "/opt/actions-runner-test" >> $GITHUB_PATH
-          
+      - name: Execute by adding to PATH
+        run: |
           # Now you can call the script name directly in the next step
           hello-tool.sh
