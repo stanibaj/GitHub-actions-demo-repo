@@ -1,0 +1,37 @@
+name: Test SSH and Docker on VPS-03 with TS OAuth
+on: 
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  test-vps-connection:
+    runs-on: self-hosted  # Runs on Machine A
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Connect to Tailscale
+        uses: tailscale/github-action@v3
+        with:
+          # These must be set in your GitHub Repo Secrets
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          # This tag must match the 'src' in your Tailscale ACLs
+          tags: tag:ci
+
+      - name: Execute Remote Tests
+        run: |
+          # We use a 'here document' (EOF) to run multiple commands on the remote machine
+          # Note: We use the '-o StrictHostKeyChecking=no' to avoid interactive prompts
+          ssh -o StrictHostKeyChecking=no cicd-user@vps-03 << 'EOF'
+            echo "--- Identity Check ---"
+            echo "I am currently logged in as: $(whoami)"
+            echo "I am running on host: $(hostname)"
+            
+            echo "--- Docker Test ---"
+            # Launch a disposable container to verify Docker group permissions
+            docker run --rm hello-world
+            
+            echo "--- Clean Up ---"
+            # Ensure the test image is removed to keep the VPS clean
+            docker image rm hello-world
+          EOF
