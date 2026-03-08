@@ -1,0 +1,25 @@
+name: Simple Remote Deploy
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # Allows you to run it manually for testing
+
+jobs:
+  deploy:
+    # This must match the label you gave your self-hosted runner on Machine A
+    runs-on: self-hosted 
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Execute Remote Commands on VPS-03
+        run: |
+          # -o StrictHostKeyChecking=no prevents the "Unknown Host" prompt in CI
+          ssh -o StrictHostKeyChecking=no cicd-user@vps-03 << 'EOF'
+
+            hostname
+            whoami
+            docker run hello-world
+          
+          EOF
